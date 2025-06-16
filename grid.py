@@ -38,12 +38,14 @@ class PandapowerSim(mosaik_api.Simulator):
         return entities
 
     def step(self, time, inputs, max_advance=None):
-        for eid, data in inputs.items():
-            if "p_mw" in data:
-                bus = self.entities[eid]["bus"]
-                self.net.load.loc[self.net.load.bus == bus, "p_mw"] = list(
-                    data["p_mw"].values()
-                )[0]
+        for eid, sources in inputs.items():
+            if sources:
+                attr_map = next(iter(sources.values()))
+                if "p_mw" in attr_map:
+                    bus = self.entities[eid]["bus"]
+                    self.net.load.loc[
+                        self.net.load.bus == bus, "p_mw"
+                    ] = attr_map["p_mw"]
         pp.runpp(self.net)
         self.time += self.time_resolution
         return self.time

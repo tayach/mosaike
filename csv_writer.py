@@ -38,9 +38,11 @@ class CSVWriter(mosaik_api.Simulator):
             # Flatten into one row per time
             row = [time]
             for eid, data in inputs.items():
-                # assumes one value
-                val = list(data.values())[0]
-                row.append(val)
+                # extract numeric value from nested mapping
+                if data:
+                    attr_map = next(iter(data.values()))
+                    val = next(iter(attr_map.values()))
+                    row.append(val)
             if not self.header_written:
                 header = ["time"] + list(inputs.keys())
                 self.writer.writerow(header)

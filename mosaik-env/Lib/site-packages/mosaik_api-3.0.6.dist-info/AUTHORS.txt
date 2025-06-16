@@ -1,0 +1,11 @@
+Authors
+=======
+
+The original concepts for the mosaik API were developed by Steffen Schütten and
+Stefan Scherfke.
+
+The author of the mosaik API version 2 is Stefan Scherfke.
+
+The author of the mosaik API version 3 is Thomas Raub.
+
+Additional contributors: André El-Ama, Okko Nannen, Annika Ofenloch, Thomas Raub, Eike Schulte, Jan Sören Schwarz, Cornelius Steinbrink

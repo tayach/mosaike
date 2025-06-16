@@ -1,0 +1,170 @@
+Metadata-Version: 2.1
+Name: mosaik-csv
+Version: 2.0.1
+Summary: Presents CSV datasets to mosaik as models.
+Home-page: https://gitlab.com/mosaik/components/data/mosaik-csv
+Author: mosaik development team
+Author-email: mosaik@offis.de
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+License-File: LICENSE.txt
+License-File: AUTHORS.txt
+Requires-Dist: arrow >=1.0.0
+Requires-Dist: mosaik-api-v3
+Requires-Dist: importlib-metadata <5.0
+Requires-Dist: pandas
+
+In this repository we have two modules: mosaik_csv and mosaik_csv_writer.
+
+Installation
+============
+
+::
+
+    $ pip install mosaik-csv
+
+If installation of psutil fails, installing python developer edition and gcc should help::
+
+    $ sudo apt-get install gcc python3-dev
+
+mosaik_csv
+==========
+
+This simulator reads CSV data and sends it to mosaik.
+
+The following code shows an example how to use the mosaik_csv simulator.
+The date_format, delimiter parameter and type are optional.
+If they are not defined, the standard value is 'YYYY-MM-DD HH:mm:ss' for the date_format, ',' for delimiter and time-based for type.
+The first line of the CSV file refers to the model name. If no model name is defined, 'Data' is set as the default::
+
+    sim_config = {
+        'CSV': {
+            'python': 'mosaik_csv:CSV',
+        }
+    }
+    world = mosaik.World(sim_config)
+    csv_sim = world.start('CSV', sim_start='01.01.2016 00:00',
+                                 datafile='data.csv',
+                                 date_format='DD.MM.YYYY HH:mm',
+                                 delimiter=',',type=time-based)
+    csv = csv_sim.Data.create(20)
+
+
+mosaik_csv_writer
+=================
+
+This simulator writes simulation results to a CSV file.
+
+
+The following code shows an example how to use the mosaik_csv_writer simulator.
+The date_format, delimiter parameter and print_results are optional.
+If they are not defined, the standard value is 'YYYY-MM-DD HH:mm:ss' for the date_format, ',' for delimiter and False for print_results.
+
+While creating the instance of the mosaik_csv_writer (csv_writer = csv_sim_writer.Monitor(buff_size = 30 * 60)) the user can define a
+buff_size depending on the simulation time (default buff_size = 500). This buff_size tells the simulator to write the data into a CSV file after every defined buffer duration. This feature speeds up the writing process of the simulator. In the given example the simulator will write the accumulated data into a CSV file after every 30 minutes simulation time (30 * 60 simulation steps)::
+
+    sim_config = {
+        'CSV_writer': {
+            'python': 'mosaik_csv_writer:CSVWriter',
+        }
+    }
+    world = mosaik.World(sim_config)
+    csv_sim_writer = world.start('CSV_writer', start_date = '01.01.2016 00:00',
+                                               date_format='%Y-%m-%d %H:%M:%S', 
+                                               output_file='results.csv')
+    csv_writer = csv_sim_writer.CSVWriter(buff_size = 30 * 60)  # write data after every 30 mins
+
+Tests
+=====
+
+You can run the tests with::
+
+    $ git clone https://gitlab.com/mosaik/mosaik-csv.git
+    $ cd mosaik-csv
+    $ pip install -r requirements.txt
+    $ pip install -e .
+    $ pytest tests
+
+
+Changelog
+=========
+
+2.0.1 - 2024-05-17
+------------------
+ - [BUGFIX] Convert numpy data types to python scalars.
+
+2.0.0 - 2023-11-21
+------------------
+
+- [CHANGE] Use pandas for CSV reader.
+- [NEW] Add CSV writer.
+
+
+1.2.0 - 2021-05-21
+------------------
+
+- [CHANGE] Updated to mosaik-api 3.0.
+
+
+1.1.0 - 2021-03-11
+------------------
+
+- [FEATURE] Allow to define the delimiter.
+- [FEATURE] Allow to define the date format.
+
+
+1.0.4 - 2021-03-04
+------------------
+
+- [CHANGE] Adjustment to new arrow API.
+
+
+1.0.3 – 2019-10-10
+------------------
+
+- [CHANGE] Added closing of input file.
+- [CHANGE] Adjustment to new arrow API.
+
+
+1.0.2 – 2014-09-22
+------------------
+
+- [CHANGE] Updated to mosaik-api 2.0.
+
+
+1.0.1 – 2014-06-23
+------------------
+
+- [CHANGE] Updated to mosaik-api 2.0a3.
+
+
+1.0 – 2014-03-26
+----------------
+
+- Initial release
+
+
+Authors
+=======
+
+The original concepts for mosaik CSV reader were developed by Stefan Scherfke.
+
+The author of mosaik CSV writer is Mohammad Arhum.
+
+Additional contributors: Robin Huwa, Pranay Kasturi, Annika Ofenloch, Thomas Raub, Jan Sören Schwarz, Deborah Tolk
+
+

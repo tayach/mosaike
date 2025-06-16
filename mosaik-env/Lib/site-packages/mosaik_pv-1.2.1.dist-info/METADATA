@@ -1,0 +1,178 @@
+Metadata-Version: 2.1
+Name: mosaik-pv
+Version: 1.2.1
+Summary: PV Simulator for Mosaik
+License: LICENSE
+Author: Cornelius Steinbrink
+Author-email: mosaik@offis.de
+Requires-Python: >=3.9,<4.0
+Classifier: License :: Other/Proprietary License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: arrow (>=1.3.0,<2.0.0)
+Requires-Dist: mosaik (>=3.2.0,<4.0.0)
+Requires-Dist: mosaik-api-v3 (>=3.0.7,<4.0.0)
+Requires-Dist: numpy (>=1.26.1,<2.0.0)
+Requires-Dist: tqdm (>=4.66.1,<5.0.0)
+Description-Content-Type: text/x-rst
+
+==========
+mosaik-pv
+==========
+
+This component was initially created by Cornelius Steinbrink based on PyPVSim by Daniel Soto, which is licensed under `CC-BY 3.0 <https://github.com/dsoto/PyPVSim/blob/master/LICENSE.txt>`_).
+It was further extended by Thomas Raub and updated by Jan Sören Schwarz and Danila Valko.
+
+The PV system simulator calculates active power output based on the Direct Normal Irradiance (DNI, [W/m2]) input and current time (hourly).
+
+PV system output data:
+
+* P[MW] - active power produced
+
+PV system input data:
+
+* DNI[W/m2] - Direct Normal Irradiance 
+* scale_factor - multiplies output [coef], might be used as a contol signal
+
+Configuration:
+
+* latitude [grad]
+* area - insolated panels area [m2]
+* efficiency [coef]
+* el_tilt - elevation [grad]
+* az_tilt - azimuth [grad]
+
+An example scenario is located in the ´demo´ folder.
+
+Other options
+=============
+Please pay attention to the input data. If you want to use only Direct Normal Irradiance input data as part of the co-simulation, 
+then *mosaik-pv* is suitable, if you want to use full weather information (global irradiance, wind speed, air temperature and pressure) then *mosaik-pvlib* is suitable. 
+If you are satisfied with historical performance estimates for a particular location or have no other input data, 
+then *mosaik-pvgis* is the best solution which is based on PVGIS performance data.
+
+Installation
+=============
+
+::
+
+    pip install mosaik-pv
+
+
+
+If you don't want to install this through PyPI, you can use pip to install the requirements.txt file::
+
+    pip install -r requirements.txt
+
+* To use this, you have to install at least version 3.2.0 of `mosaik <https://mosaik.offis.de/>`_.
+* It is recommended, to use the *mosaik-csv* library to properly import DNI data.
+
+How to Use
+=============
+Specify simulators configurations within your scenario script::
+
+    LAT = 32.0
+    AREA = 1
+    EFF = 0.5
+    EL = 32.0
+    AZ = 0.0
+    START = "2014-01-01 01:00:00"
+    END = 3600 * 24
+    STEP_SIZE = 60 * 60
+    DNI_DATA = "solar_data.csv"
+
+
+    SIM_CONFIG = {
+        'DNISim': {
+            'python': 'mosaik_csv:CSV'
+        },  
+        'PVSim': {
+            'python': 'mosaik_components.pv.pvsimulator:PVSimulator'
+        },
+        ...
+    }
+
+Initialize the PV- and DNI-simulator::
+
+    # Create DNI simulator
+    DNI_sim = world.start("DNISim", 
+                        sim_start=START, 
+                        datafile=DNI_DATA)
+    
+    # Create PV system with certain configuration
+    pv_sim = world.start(
+                        "PVSim",
+                        start_date=START,
+                        step_size=STEP_SIZE)
+
+
+Instantiate model entities::
+
+    DNI_model = DNI_sim.DNI.create(1)
+
+    pv_model = pv_sim.PV.create(1, latitude=LAT, area=AREA,
+                            efficiency=EFF, el_tilt=EL, az_tilt=AZ)
+
+Connect DNI input with PV-simulator::
+
+    world.connect(
+                        DNI_model[0],
+                        pv_model[0],
+                        ("DNI", "DNI[W/m2]"),
+                    )
+
+CSV-Formatting
+==============
+
+For the simulator to work correctly, both .csv files have to be specifically formatted!
+
+DNI-data
+---------
+The meteo_data.csv is formatted accordingly to the conventions of the `mosaik_csv <https://gitlab.com/mosaik/components/data/mosaik-csv>`_ simulator::
+
+    Wind
+    Date,wind_speed
+    YYYY-MM-DD HH:mm:ss,v1
+    YYYY-MM-DD HH:mm:ss,v2
+    ...
+    DNI
+    Time,DNI
+    YYYY-MM-DD HH:mm:ss,2.1,92.0,0.0,0.0
+
+* Each entry in the .csv needs a Date in the YYYY-MM-DD HH:mm:ss format and a set of values.
+
+Changelog
+=========
+
+1.2.1 - 2024-03-06
+------------------
+
+- Minor changes: scipy dependance was removed
+
+1.2 - 2024-02-13
+------------------
+
+- Naming convention fixed
+- Minor changes
+
+1.1 - 2024-01-11
+------------------
+
+- Restructured as a mosaik component
+- Active power output in [MW]
+- scale_factor added as input
+- Readme and examples added
+
+1.0 - 2023-05-10
+------------------
+
+- Initial release of version implemented by Cornelius Steinbrink
+
+Authors
+=======
+
+The adapter was initially developed by Cornelius Steinbrink based on solution by Daniel Soto, extended by Thomas Raub and updated by Jan Sören Schwarz and Danila Valko.
+

@@ -34,7 +34,13 @@ def main():
 
     # Connect random source to grid inputs
     for rand, grid in zip(random_sources, grid_entities):
-        world.connect(rand, grid, "value", "p_mw")
+        # Use an explicit attribute mapping so that the random value is
+        # sent to the grid's ``p_mw`` input. When connect() receives
+        # multiple plain strings they are interpreted as individual
+        # ``src_attr -> src_attr`` mappings which caused a ScenarioError
+        # because the grid entities don't provide an attribute named
+        # ``value`` and the random sources don't have ``p_mw``.
+        world.connect(rand, grid, ("value", "p_mw"))
 
     # Connect grid outputs to CSV logger
     for grid in grid_entities:

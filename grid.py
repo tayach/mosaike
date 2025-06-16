@@ -26,7 +26,7 @@ class PandapowerSim(mosaik_api.Simulator):
         self.net = nw.mv_oberrhein(scenario="load")
 
     def init(self, sid, time_resolution=60, **kwargs):
-        self.time_resolution = time_resolution
+        self.time_resolution = int(time_resolution)
         return self.meta
 
     def create(self, num, model):

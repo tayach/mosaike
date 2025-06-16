@@ -24,7 +24,7 @@ class RandomSim(mosaik_api.Simulator):
         self.time_resolution = None
 
     def init(self, sid, time_resolution=60, **kwargs):
-        self.time_resolution = time_resolution
+        self.time_resolution = int(time_resolution)
         return self.meta
 
     def create(self, num, model, dist="uniform", low=0, high=1):
@@ -36,7 +36,7 @@ class RandomSim(mosaik_api.Simulator):
         return entities
 
     def step(self, time, inputs, max_advance=None):
-        return time + self.time_resolution
+        return int(time + self.time_resolution)
 
     def get_data(self, outputs):
         data = {}

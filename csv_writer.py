@@ -9,7 +9,8 @@ META = {
         "CSVWriter": {
             "public": True,
             "params": ["output_file"],
-            "attrs": [],  # no internal state to expose
+            "attrs": ["vm_pu"],
+            "requires": ["vm_pu"],
         },
     },
 }
@@ -24,7 +25,7 @@ class CSVWriter(mosaik_api.Simulator):
         self.time_resolution = None
 
     def init(self, sid, time_resolution=60, output_file="results.csv", **kwargs):
-        self.time_resolution = time_resolution
+        self.time_resolution = int(time_resolution)
         self.file = open(output_file, "w", newline="")
         self.writer = csv.writer(self.file)
         return self.meta

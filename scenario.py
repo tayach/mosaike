@@ -26,6 +26,9 @@ def main():
         "CSVWriter", step_size=STEP_SIZE, output_file="results.csv"
     )
 
+    # Create a single CSV writer entity
+    writer = csv_writer.CSVWriter.create(1)[0]
+
     # Create grid entities (e.g., 5 buses)
     grid_entities = grid_sim.OberrheinGrid.create(5)
 
@@ -44,7 +47,7 @@ def main():
 
     # Connect grid outputs to CSV logger
     for grid in grid_entities:
-        world.connect(grid, csv_writer, "vm_pu")
+        world.connect(grid, writer, "vm_pu")
 
     # Run the simulation
     world.run(until=END)

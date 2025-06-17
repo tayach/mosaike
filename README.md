@@ -1,7 +1,7 @@
 # Mosaik Demo
 
 This repository contains a simple Mosaik setup with a grid simulator,
-a random data generator, and a CSV logger. Use the following steps to
+a random data generator, and an HDF5 logger. Use the following steps to
 run the example scenario.
 
 ## 1. Install dependencies
@@ -39,6 +39,7 @@ python scenario.py
 
 ## 5. Inspect results
 
-After the run finishes the results are written to `results.hdf5`. This
-file contains the collected outputs of the grid simulation and can be
-analysed with your preferred tools.
+After the run finishes the results are written to `results.hdf5`. No
+`results.csv` file is generated. The HDF5 file contains the collected
+outputs of the grid simulation and can be analysed with your preferred
+tools.

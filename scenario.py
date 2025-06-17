@@ -6,7 +6,7 @@ SIM_CONFIG = {
         "python": "mosaik_pandapower.simulator:Pandapower",
     },
     "HouseholdSim": {
-        "python": "mosaik_householdsim.mosaik:HouseholdSim",
+        "python": "householdsim.mosaik:HouseholdSim",
     },
     "HDF5": {
         "cmd": "mosaik-hdf5 %(addr)s",
@@ -22,8 +22,8 @@ def main():
     world = mosaik.World(SIM_CONFIG)
 
     grid_sim = world.start("GridSim", step_size=STEP_SIZE)
-    hh_sim = world.start("HouseholdSim", step_size=STEP_SIZE)
-    hdf5 = world.start("HDF5", step_size=STEP_SIZE)
+    hh_sim = world.start("HouseholdSim", time_resolution=STEP_SIZE)
+    hdf5 = world.start("HDF5", step_size=STEP_SIZE, duration=END, time_resolution=STEP_SIZE)
 
     # Load grid description
     grid = grid_sim.Grid.create(1, gridfile="grid.json")[0]

@@ -31,7 +31,12 @@ class PandapowerSim(mosaik_api.Simulator):
 
     def create(self, num, model):
         entities = []
-        for i, bus in enumerate(self.net.bus.index[:num]):
+        # Use buses that actually have loads so that varying the ``p_mw``
+        # values influences the power flow results. ``net.load.bus`` contains
+        # the bus indices for all loads in the network. Select the first
+        # ``num`` unique bus indices from this list.
+        load_buses = list(dict.fromkeys(self.net.load.bus.values))[:num]
+        for bus in load_buses:
             eid = f"{self.eid_prefix}{bus}"
             self.entities[eid] = {"bus": bus}
             entities.append({"eid": eid, "type": model})
@@ -40,12 +45,16 @@ class PandapowerSim(mosaik_api.Simulator):
     def step(self, time, inputs, max_advance=None):
         for eid, sources in inputs.items():
             if sources:
+                # ``sources`` maps src_eid -> {attr_name: value}. We only
+                # expect a single source attribute per bus, so extract the
+                # numeric value regardless of the attribute name.
                 attr_map = next(iter(sources.values()))
-                if "p_mw" in attr_map:
+                if attr_map:
+                    val = next(iter(attr_map.values()))
                     bus = self.entities[eid]["bus"]
                     self.net.load.loc[
                         self.net.load.bus == bus, "p_mw"
-                    ] = attr_map["p_mw"]
+                    ] = val
         pp.runpp(self.net)
         self.time += self.time_resolution
         return self.time

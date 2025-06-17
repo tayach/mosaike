@@ -34,22 +34,28 @@ class CSVWriter(mosaik_api.Simulator):
         return [{"eid": f"Writer_{i}", "type": model} for i in range(num)]
 
     def step(self, time, inputs, max_advance=None):
-        # inputs: {eid: {Bus_X: {'vm_pu': 1.0}, ...}, ...}
-        if inputs:
-            # Flatten into one row per time
-            row = [time]
-            for eid, data in inputs.items():
-                # extract numeric value from nested mapping
-                if data:
-                    attr_map = next(iter(data.values()))
-                    val = next(iter(attr_map.values()))
-                    row.append(val)
-            if not self.header_written:
-                header = ["time"] + list(inputs.keys())
-                self.writer.writerow(header)
-                self.header_written = True
-            self.writer.writerow(row)
-            self.file.flush()
+        # ``inputs`` has the structure {writer_eid: {Bus_X: {'vm_pu': val}, ...}}
+        # We only create a single writer entity, so take the first mapping and
+        # write one column per bus.
+        if not inputs:
+            return time + self.time_resolution
+
+        writer_data = next(iter(inputs.values()))
+        vm_pu_map = writer_data.get("vm_pu", {})
+        buses = sorted(vm_pu_map.keys())
+
+        if not self.header_written:
+            header = ["time"] + buses
+            self.writer.writerow(header)
+            self.header_written = True
+
+        row = [time]
+        for bus in buses:
+            val = vm_pu_map.get(bus)
+            row.append(val)
+
+        self.writer.writerow(row)
+        self.file.flush()
         return time + self.time_resolution
 
     def get_data(self, outputs):

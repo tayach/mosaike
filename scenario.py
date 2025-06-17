@@ -2,18 +2,18 @@ import mosaik
 
 SIM_CONFIG = {
     "GridSim": {
-        "python": "grid:PandapowerSim",
+        "python": "mosaik_pandapower.simulator:Pandapower",
     },
-    "Random": {
-        "python": "random_sim:RandomSim",
+    "HouseholdSim": {
+        "python": "mosaik_householdsim.mosaik:HouseholdSim",
     },
-    "CSVWriter": {
-        "python": "csv_writer:CSVWriter",
+    "HDF5": {
+        "cmd": "mosaik-hdf5 %(addr)s",
     },
 }
 
 END = 3600  # 1 hour simulation
-STEP_SIZE = 60  # 1-minute time steps
+STEP_SIZE = 900  # 15-minute time steps
 
 
 def main():
@@ -21,33 +21,39 @@ def main():
 
     # Start simulators
     grid_sim = world.start("GridSim", step_size=STEP_SIZE)
-    rand_sim = world.start("Random", step_size=STEP_SIZE)
-    csv_writer = world.start(
-        "CSVWriter", step_size=STEP_SIZE, output_file="results.csv"
-    )
+    house_sim = world.start("HouseholdSim", step_size=STEP_SIZE)
+    hdf5 = world.start("HDF5", step_size=STEP_SIZE, duration=END)
 
-    # Create a single CSV writer entity
-    writer = csv_writer.CSVWriter.create(1)[0]
+    # Load grid and residential profiles
+    grid = grid_sim.Grid.create(
+        1, gridfile="grid.json", sim_start="2025-01-01 00:00:00"
+    )[0]
+    resid = house_sim.ResidentialLoads.create(
+        1,
+        sim_start="2025-01-01 00:00:00",
+        profile_file="load_profiles.data",
+        grid_name="grid",
+    )[0]
+    houses = resid.children
 
-    # Create grid entities (e.g., 5 buses)
-    grid_entities = grid_sim.OberrheinGrid.create(5)
+    # Map buses by their ID without the simulator prefix
+    buses = [c for c in grid.children if c.type == "Bus"]
+    bus_map = {b.eid.split("-", 1)[1]: b for b in buses}
 
-    # Create random sources for each bus
-    random_sources = rand_sim.RandomData.create(5, dist="uniform", low=0, high=5)
+    # Connect houses to their load buses
+    node_ids = world.get_data(houses, "node_id")
+    for house in houses:
+        node_id = node_ids[house.eid]["node_id"]
+        bus = bus_map.get(node_id)
+        if bus:
+            world.connect(house, bus, ("P_out", "p_mw"))
 
-    # Connect random source to grid inputs
-    for rand, grid in zip(random_sources, grid_entities):
-        # Use an explicit attribute mapping so that the random value is
-        # sent to the grid's ``p_mw`` input. When connect() receives
-        # multiple plain strings they are interpreted as individual
-        # ``src_attr -> src_attr`` mappings which caused a ScenarioError
-        # because the grid entities don't provide an attribute named
-        # ``value`` and the random sources don't have ``p_mw``.
-        world.connect(rand, grid, ("value", "p_mw"))
+    # Create database entity
+    db = hdf5.Database.create(1, filename="results.hdf5")[0]
 
-    # Connect grid outputs to CSV logger
-    for grid in grid_entities:
-        world.connect(grid, writer, "vm_pu")
+    # Connect bus results to database
+    for bus in buses:
+        world.connect(bus, db, "vm_pu")
 
     # Run the simulation
     world.run(until=END)

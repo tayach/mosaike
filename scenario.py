@@ -4,12 +4,6 @@ SIM_CONFIG = {
     "GridSim": {
         "python": "grid:PandapowerSim",
     },
-    "Random": {
-        "python": "random_sim:RandomSim",
-    },
-    "CSVWriter": {
-        "python": "csv_writer:CSVWriter",
-    },
 }
 
 END = 3600  # 1 hour simulation
@@ -19,35 +13,11 @@ STEP_SIZE = 60  # 1-minute time steps
 def main():
     world = mosaik.World(SIM_CONFIG)
 
-    # Start simulators
+    # Start simulator
     grid_sim = world.start("GridSim", step_size=STEP_SIZE)
-    rand_sim = world.start("Random", step_size=STEP_SIZE)
-    csv_writer = world.start(
-        "CSVWriter", step_size=STEP_SIZE, output_file="results.csv"
-    )
-
-    # Create a single CSV writer entity
-    writer = csv_writer.CSVWriter.create(1)[0]
 
     # Create grid entities (e.g., 5 buses)
-    grid_entities = grid_sim.OberrheinGrid.create(5)
-
-    # Create random sources for each bus
-    random_sources = rand_sim.RandomData.create(5, dist="uniform", low=0, high=5)
-
-    # Connect random source to grid inputs
-    for rand, grid in zip(random_sources, grid_entities):
-        # Use an explicit attribute mapping so that the random value is
-        # sent to the grid's ``p_mw`` input. When connect() receives
-        # multiple plain strings they are interpreted as individual
-        # ``src_attr -> src_attr`` mappings which caused a ScenarioError
-        # because the grid entities don't provide an attribute named
-        # ``value`` and the random sources don't have ``p_mw``.
-        world.connect(rand, grid, ("value", "p_mw"))
-
-    # Connect grid outputs to CSV logger
-    for grid in grid_entities:
-        world.connect(grid, writer, "vm_pu")
+    grid_sim.OberrheinGrid.create(5)
 
     # Run the simulation
     world.run(until=END)

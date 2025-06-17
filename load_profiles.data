@@ -1,0 +1,7 @@
+{
+  "profiles": [
+    [0.5, 0.6, 0.4, 0.7]
+  ],
+  "meta": {"num_profiles": 1, "profile_interval": 900, "profile_units": "kW"},
+  "id_mapping": {"household_1": "Bus_103"}
+}

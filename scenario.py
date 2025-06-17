@@ -21,7 +21,9 @@ STEP_SIZE = 900  # 15-minute time steps
 def main():
     world = mosaik.World(SIM_CONFIG)
 
-    grid_sim = world.start("GridSim", step_size=STEP_SIZE)
+    grid_sim = world.start(
+        "GridSim", time_resolution=STEP_SIZE, step_size=STEP_SIZE
+    )
     hh_sim = world.start("HouseholdSim", time_resolution=STEP_SIZE)
     hdf5 = world.start("HDF5", step_size=STEP_SIZE, duration=END, time_resolution=STEP_SIZE)
 

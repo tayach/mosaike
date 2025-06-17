@@ -14,6 +14,7 @@ venv/
 # Ignore results/log files
 *.csv
 *.log
+*.hdf5
 
 # OS-specific
 .DS_Store

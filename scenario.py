@@ -24,7 +24,7 @@ def main():
     grid_sim = world.start(
         "GridSim", time_resolution=STEP_SIZE, step_size=STEP_SIZE
     )
-    hh_sim = world.start("HouseholdSim", time_resolution=STEP_SIZE)
+    hh_sim = world.start("HouseholdSim", time_resolution=1)
     hdf5 = world.start("HDF5", step_size=STEP_SIZE, duration=END, time_resolution=STEP_SIZE)
 
     # Load grid description
@@ -33,7 +33,7 @@ def main():
     # Create residential load entities
     houses_parent = hh_sim.ResidentialLoads.create(
         1,
-        sim_start="2025-01-01 00:00:00",
+        sim_start="2014-01-01 00:00:00",
         profile_file="load_profiles.data",
         grid_name="Oberrhein",
     )[0]

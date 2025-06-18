@@ -2,8 +2,7 @@
 {"start_date": "2014-01-01 00:00:00", "resolution": 15, "unit": "W", "num_profiles": 3}
 # id_list
 {
-  "spam": ["x", "y"],
-  "eggs": ["a", "b", "c", "d", "e"]
+  "Oberrhein": [0, 1, 2]
 }
 # attrs
 num_hh,1,2,1

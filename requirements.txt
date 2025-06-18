@@ -3,6 +3,6 @@ mosaik-api==3.0.3
 pandas>=1.3.0
 numpy<2.0
 pandapower==2.13.1
-mosaik-pandapower
+mosaik-pandapower==0.2.2
 mosaik-householdsim
 mosaik-hdf5

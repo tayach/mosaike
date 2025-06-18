@@ -1,4 +1,5 @@
 import mosaik
+import csv_writer
 
 
 SIM_CONFIG = {
@@ -8,8 +9,8 @@ SIM_CONFIG = {
     "HouseholdSim": {
         "python": "householdsim.mosaik:HouseholdSim",
     },
-    "HDF5": {
-        "cmd": "mosaik-hdf5 %(addr)s",
+    "CSVWriter": {
+        "python": "csv_writer:CSVWriter",
     },
 }
 
@@ -25,7 +26,9 @@ def main():
         "GridSim", time_resolution=STEP_SIZE, step_size=STEP_SIZE
     )
     hh_sim = world.start("HouseholdSim", time_resolution=1)
-    hdf5 = world.start("HDF5", step_size=STEP_SIZE, duration=END, time_resolution=STEP_SIZE)
+    csv_writer = world.start(
+        "CSVWriter", step_size=STEP_SIZE, output_file="results.csv"
+    )
 
     # Load grid description
     grid = grid_sim.Grid.create(1, gridfile="grid.json")[0]
@@ -48,10 +51,10 @@ def main():
         if bus:
             world.connect(house, bus, ("P_out", "p_mw"))
 
-    # Store bus results in HDF5
-    db = hdf5.Database.create(1, filename="results.hdf5")[0]
+    # Store bus results in CSV file
+    writer = csv_writer.CSVWriter.create(1)[0]
     for bus in buses.values():
-        world.connect(bus, db, "vm_pu")
+        world.connect(bus, writer, "vm_pu")
 
     world.run(until=END)
 

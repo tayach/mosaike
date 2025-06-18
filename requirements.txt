@@ -5,4 +5,3 @@ numpy<2.0
 pandapower==2.13.1
 mosaik-pandapower==0.2.2
 mosaik-householdsim
-mosaik-hdf5
